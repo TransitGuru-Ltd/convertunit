@@ -4,11 +4,6 @@
 #include <string.h>
 #include "bintree.h"
 
-int conu_tree_insert (struct conu_node* head, const char* in_str, 
-  struct conu_err_t* err);
-int conu_tree_search (struct conu_node* head, const char* search_str);
-int conu_tree_remove (struct conu_node* head, const char* remove_str);
-
 //! Allocates a new tree node on the heap
 //
 // \param err Pointer to an error struct
@@ -35,7 +30,7 @@ struct conu_node* conu_node_alloc (struct conu_err_t* err)
   return new_node;
 }
 
-int conu_init_tree (struct conu_node* tree, const char* head_str, 
+int conu_tree_init (struct conu_node* tree, const char* head_str, 
   struct conu_err_t* err)
 {
   // allocate new node for head of tree
@@ -69,18 +64,98 @@ int conu_tree_insert (struct conu_node* head, const char* in_str,
   struct conu_node* new_node = conu_node_alloc (err);
   if (new_node == NULL) return 0; // memory allocation failed. check err->msg.
 
-  struct conu_node* ins_loc = head;
+  struct conu_node** ins_loc = &head;
 
   // search for insertion location
-  while (ins_loc != NULL)
+  while (*ins_loc != NULL)
   {
     // if insertion string is less than current node go to left child
-    if (strcmp (in_str, ins_loc -> str) < 0)
-      ins_loc = ins_loc -> lchild;
+    if (strcmp (in_str, *ins_loc -> str) < 0)
+      *ins_loc = *ins_loc -> lchild;
     else
-      ins_loc = ins_loc -> rchild;  // greater than or equal goes to right
+      *ins_loc = *ins_loc -> rchild;  // greater than or equal goes to right
   }
 
-  // finally, but new node into insertion location
-  ins_loc = new_node;
+  // finally, put new node into insertion location
+  *ins_loc = new_node;
+}
+
+//! Search for node in tree
+//
+// \param head Pointer to head of tree
+// \param search_str String to search for in tree
+// \return NULL if not found, pointer to node if found
+struct conu_node* conu_tree_search (struct conu_node* head, 
+  const char* search_str)
+{
+  int cmp;
+  struct conu_node* curr_loc = head;
+
+  // search for insertion location
+  while (curr_loc != NULL)
+  {
+    // compare search string to current location
+    cmp = strcmp (search_str, curr_loc -> str);
+
+    if (cmp == 0) return curr_loc; // string found! return current node
+
+    // if insertion string is less than current node go to left child
+    if (cmp < 0)
+      curr_loc = curr_loc -> lchild;
+    else
+      curr_loc = curr_loc -> rchild;  // greater than or equal goes to right
+  }
+}
+
+//! Search for node in tree and remove it
+//
+// \param head Pointer to head of tree
+// \param remove_str String to remove from tree
+// \return 1 if found and removed, 0 if not found
+int conu_tree_remove (struct conu_node* head, const char* remove_str)
+{
+  // TODO: implement
+
+  return 0;
+}
+
+//! Recursively free memory allocated for tree
+//
+// \param head Pointer to head of tree
+void conu_tree_destroy (struct conu_node* head)
+{
+  if (head == NULL) return;
+  conu_tree_destroy (head -> lchild);
+  conu_tree_destory (head -> rchild);
+  free (head);
+}
+
+//! Recursively print tree in preorder
+//
+// \param head Pointer to head of tree
+void conu_tree_print (struct conu_node* head)
+{
+  if (head == NULL) return;
+
+  conu_tree_print (head -> lchild);
+
+  fputs (head -> str, stdout);
+  fputc ('\n', stdout);
+
+  conu_tree_print (head -> rchild);
+}
+
+//! Recursively print tree in postorder
+//
+// \param head Pointer to head of tree
+void conu_tree_print_postord (struct conu_node* head)
+{
+  if (head == NULL) return;
+
+  conu_tree_print (head -> lchild);
+
+  conu_tree_print (head -> rchild);
+
+  fputs (head -> str, stdout);
+  fputc ('\n', stdout);
 }
