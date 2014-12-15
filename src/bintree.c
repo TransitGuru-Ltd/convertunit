@@ -1,6 +1,8 @@
 // Practice with a binary search tree. Will potentially be good practice
 // if this program uses a b-tree for unit conversion look-ups.
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "bintree.h"
 
@@ -47,7 +49,7 @@ struct conu_node* conu_tree_init (const char* head_str, struct conu_err_t* err)
   });
 
   // copy memory from string passed to function into our tree node
-  memcpy (new_str, head_str, n);
+  memcpy (tree -> str, head_str, n);
 
   // the node does not yet have children. set children to NULL
   tree -> lchild = NULL;
@@ -65,23 +67,38 @@ struct conu_node* conu_tree_init (const char* head_str, struct conu_err_t* err)
 int conu_tree_insert (struct conu_node* head, const char* in_str, 
   struct conu_err_t* err)
 {
-  struct conu_node* new_node = conu_node_alloc (err);
-  if (new_node == NULL) return 0; // memory allocation failed. check err->msg.
+  struct conu_node* new_node = conu_tree_init (in_str, err); // initialize node
+  if (new_node == NULL) return 0; // memory allocation failed, return false
 
-  struct conu_node** ins_loc = &head;
+  struct conu_node* ins_loc = head;
 
   // search for insertion location
-  while (*ins_loc != NULL)
+  while (ins_loc != NULL)
   {
     // if insertion string is less than current node go to left child
-    if (strcmp (in_str, *ins_loc -> str) < 0)
-      *ins_loc = *ins_loc -> lchild;
+    if (strcmp (in_str, ins_loc -> str) < 0)
+    {
+      if (ins_loc -> lchild != NULL)
+        ins_loc = ins_loc -> lchild;
+      else
+      {
+        ins_loc -> lchild = new_node;
+        return 1;
+      }
+    }
     else
-      *ins_loc = *ins_loc -> rchild;  // greater than or equal goes to right
+    {
+      if (ins_loc -> rchild != NULL)
+        ins_loc = ins_loc -> rchild;  // greater than or equal goes to right
+      else
+      {
+        ins_loc -> rchild = new_node;
+        return 1;
+      }
+    }
   }
 
-  // finally, put new node into insertion location
-  *ins_loc = new_node;
+  return 0;
 }
 
 //! Search for node in tree
@@ -89,11 +106,11 @@ int conu_tree_insert (struct conu_node* head, const char* in_str,
 // \param head Pointer to head of tree
 // \param search_str String to search for in tree
 // \return NULL if not found, pointer to node if found
-struct conu_node* conu_tree_search (struct conu_node* head, 
+const struct conu_node* conu_tree_search (const struct conu_node* head, 
   const char* search_str)
 {
   int cmp;
-  struct conu_node* curr_loc = head;
+  const struct conu_node* curr_loc = head;
 
   // search for insertion location
   while (curr_loc != NULL)
@@ -109,6 +126,41 @@ struct conu_node* conu_tree_search (struct conu_node* head,
     else
       curr_loc = curr_loc -> rchild;  // greater than or equal goes to right
   }
+
+  return curr_loc;
+}
+
+//! Search for node in tree and store parent
+//
+// \param head Pointer to head of tree
+// \param search_str String to search for in tree
+// \param parent Pointer to set to parent node location
+// \return NULL if not found, pointer to node if found
+const struct conu_node* conu_tree_search_parent (const struct conu_node* head, 
+  const char* search_str, const struct conu_node** parent)
+{
+  int cmp;
+  *parent = NULL; // if head is the search node the parent should be NULL
+  const struct conu_node* curr_loc = head;
+
+  // search for insertion location
+  while (curr_loc != NULL)
+  {
+    // compare search string to current location
+    cmp = strcmp (search_str, curr_loc -> str);
+
+    if (cmp == 0) return curr_loc; // string found! return current node
+
+    *parent = curr_loc; // store parent's location before updating current loc
+
+    // if insertion string is less than current node go to left child
+    if (cmp < 0)
+      curr_loc = curr_loc -> lchild;
+    else
+      curr_loc = curr_loc -> rchild;  // greater than or equal goes to right
+  }
+
+  return curr_loc;
 }
 
 //! Search for node in tree and remove it
@@ -130,21 +182,21 @@ void conu_tree_destroy (struct conu_node* head)
 {
   if (head == NULL) return;
   conu_tree_destroy (head -> lchild);
-  conu_tree_destory (head -> rchild);
+  conu_tree_destroy (head -> rchild);
   free (head);
 }
 
 //! Recursively print tree in preorder
 //
 // \param head Pointer to head of tree
-void conu_tree_print (struct conu_node* head)
+void conu_tree_print (const struct conu_node* head)
 {
-  if (head == NULL) return;
+  if (head == NULL) return; // reached end of branch, terminate recursion
 
   conu_tree_print (head -> lchild);
 
   fputs (head -> str, stdout);
-  fputc (' ', stdout);
+  fputs ("--", stdout);
 
   conu_tree_print (head -> rchild);
 }
@@ -152,7 +204,7 @@ void conu_tree_print (struct conu_node* head)
 //! Recursively print tree in postorder
 //
 // \param head Pointer to head of tree
-void conu_tree_print_postord (struct conu_node* head)
+void conu_tree_print_postord (const struct conu_node* head)
 {
   if (head == NULL) return;
 
@@ -161,5 +213,5 @@ void conu_tree_print_postord (struct conu_node* head)
   conu_tree_print (head -> rchild);
 
   fputs (head -> str, stdout);
-  fputc (' ', stdout);
+  fputs ("--", stdout);
 }

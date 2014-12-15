@@ -12,7 +12,7 @@ enum conu_err_codes
 
 struct conu_err_t
 {
-  uint code;
+  unsigned int code;
   char msg[_CONU_ERR_MSG_BUFFER_SZ];
 };
 

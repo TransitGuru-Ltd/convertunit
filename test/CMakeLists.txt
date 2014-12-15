@@ -26,7 +26,7 @@ include_directories(../include)
 
 # dependencies
 # add_executable(some_exe main.c src1.c src2.c etc.c)
-add_executable(test_bintree.c bintree.c)
+add_executable(test_bintree test_bintree.c ../src/bintree.c)
 
 
 # run 'cmake -D GOPROF=true /path/to/this/dir' to use google profiler
