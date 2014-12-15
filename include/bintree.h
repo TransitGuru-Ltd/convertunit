@@ -10,15 +10,15 @@ struct conu_node
   char* str;
 };
 
-int conu_tree_insert (struct conu_node* head, const char* in_str, 
+int conu_tree_insert (struct conu_node** head, const char* in_str, 
   struct conu_err_t* err);
-struct conu_node* conu_tree_search (struct conu_node* head, 
+struct conu_node* conu_tree_search (const struct conu_node* head, 
   const char* search_str);
-int conu_tree_remove (struct conu_node* head, const char* remove_str);
+int conu_tree_remove (struct conu_node** head, const char* remove_str);
 struct conu_node* conu_node_alloc (struct conu_err_t* err);
-int conu_tree_init (struct conu_node* tree, const char* head_str);
+int conu_tree_init (const char* head_str, struct conu_err_t* err);
 void conu_tree_destroy (struct conu_node* head);
-void conu_tree_print (struct conu_node* head);
-void conu_tree_print_postord (struct conu_node* head);
+void conu_tree_print (const struct conu_node* head);
+void conu_tree_print_postord (const struct conu_node* head);
 
 #endif

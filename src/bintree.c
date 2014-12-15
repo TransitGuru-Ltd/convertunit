@@ -30,18 +30,20 @@ struct conu_node* conu_node_alloc (struct conu_err_t* err)
   return new_node;
 }
 
-int conu_tree_init (struct conu_node* tree, const char* head_str, 
-  struct conu_err_t* err)
+struct conu_node* conu_tree_init (const char* head_str, struct conu_err_t* err)
 {
+  struct conu_node* tree;
+
   // allocate new node for head of tree
   tree = conu_node_alloc (err);
-  if (tree == NULL) return 0; // memory allocation failed. check err->msg.
+  if (tree == NULL) return NULL; // memory allocation failed. check err->msg.
 
   // allocate memory for string to store
   size_t n = sizeof (char) * (strlen (head_str) + 1);
   tree -> str = (char *) malloc (n);
   _CHECK_MEM_ALLOC (tree -> str, err, {
-    return 0;
+    free (tree);
+    return NULL;
   });
 
   // copy memory from string passed to function into our tree node
@@ -50,6 +52,8 @@ int conu_tree_init (struct conu_node* tree, const char* head_str,
   // the node does not yet have children. set children to NULL
   tree -> lchild = NULL;
   tree -> rchild = NULL;
+
+  return tree;
 }
 
 //! Inserts new node into the tree
@@ -140,7 +144,7 @@ void conu_tree_print (struct conu_node* head)
   conu_tree_print (head -> lchild);
 
   fputs (head -> str, stdout);
-  fputc ('\n', stdout);
+  fputc (' ', stdout);
 
   conu_tree_print (head -> rchild);
 }
@@ -157,5 +161,5 @@ void conu_tree_print_postord (struct conu_node* head)
   conu_tree_print (head -> rchild);
 
   fputs (head -> str, stdout);
-  fputc ('\n', stdout);
+  fputc (' ', stdout);
 }
