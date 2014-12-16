@@ -1,6 +1,7 @@
 // Practice with a binary search tree. Will potentially be good practice
 // if this program uses a b-tree for unit conversion look-ups.
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,12 +64,12 @@ struct conu_node* conu_tree_init (const char* head_str, struct conu_err_t* err)
 // \param head Pointer to head of tree
 // \param in_str String to insert into tree
 // \param err Pointer to error type
-// \return 0 if insertion fails
-int conu_tree_insert (struct conu_node* head, const char* in_str, 
+// \return Is insertion successful?
+bool conu_tree_insert (struct conu_node* head, const char* in_str, 
   struct conu_err_t* err)
 {
   struct conu_node* new_node = conu_tree_init (in_str, err); // initialize node
-  if (new_node == NULL) return 0; // memory allocation failed, return false
+  if (new_node == NULL) return false; // memory allocation failed, return false
 
   struct conu_node* ins_loc = head;
 
@@ -83,7 +84,7 @@ int conu_tree_insert (struct conu_node* head, const char* in_str,
       else
       {
         ins_loc -> lchild = new_node;
-        return 1;
+        return true;
       }
     }
     else
@@ -93,12 +94,16 @@ int conu_tree_insert (struct conu_node* head, const char* in_str,
       else
       {
         ins_loc -> rchild = new_node;
-        return 1;
+        return true;
       }
     }
   }
 
-  return 0;
+  err -> code = CONU_UNDEF_ERR;
+  snprintf (err -> msg, _CONU_ERR_MSG_BUFFER_SZ, "'%p' failed to insert '%s' "
+    "in line %d of file %s (function %s)\n", head, in_str, __LINE__, __FILE__,
+    __func__);
+  return false;
 }
 
 //! Search for node in tree
@@ -167,12 +172,12 @@ const struct conu_node* conu_tree_search_parent (const struct conu_node* head,
 //
 // \param head Pointer to head of tree
 // \param remove_str String to remove from tree
-// \return 1 if found and removed, 0 if not found
-int conu_tree_remove (struct conu_node* head, const char* remove_str)
+// \return Is successful?
+bool conu_tree_remove (struct conu_node* head, const char* remove_str)
 {
   // TODO: implement
 
-  return 0;
+  return false;
 }
 
 //! Recursively free memory allocated for tree
@@ -183,6 +188,7 @@ void conu_tree_destroy (struct conu_node* head)
   if (head == NULL) return;
   conu_tree_destroy (head -> lchild);
   conu_tree_destroy (head -> rchild);
+  free (head -> str);
   free (head);
 }
 
